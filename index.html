@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maddasoft production</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        [x-cloak] { display: none !important; }
+        .asset-tab-button { transition: all 0.2s ease-in-out; border-bottom: 2px solid transparent; }
+        .asset-tab-button.active { border-bottom-color: #3b82f6; color: #ffffff; }
+        @keyframes animate-gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .animated-gradient-text {
+          background-image: linear-gradient(to right, #38b2ac, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #ef4444, #38b2ac);
+          background-size: 300% auto; animation: animate-gradient 8s linear infinite;
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent;
+        }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #1e293b; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .form-input { background-color: #1e293b; border: 1px solid #334155; color: #f1f5f9; transition: all 0.2s ease-in-out; }
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); }
+        .form-input:disabled { background-color: #334155; cursor: not-allowed; opacity: 0.5; }
+        button:disabled { cursor: not-allowed; opacity: 0.5; }
+    </style>
+</head>
+<body class="text-slate-200 antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-8xl" x-data="promptApp">
+        
+        <header class="text-center mb-10">
+            <div class="flex justify-end mb-4">
+                <div class="relative">
+                    <select x-model="currentLang" @change="saveData()" class="bg-slate-700 text-white text-xs rounded-md py-1 pl-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="id">Bahasa Indonesia</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold animated-gradient-text">
+                Maddasoft production
+            </h1>
+            <p class="mt-2 text-lg text-slate-400">
+                Form Generator Offline
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-slate-800/50 p-6 rounded-2xl shadow-lg border border-slate-700/50">
+                <h2 class="text-2xl font-semibold mb-6 text-white" x-text="uiStrings.assetLibrary[currentLang]"></h2>
+                <div class="mb-6 border-b border-slate-700">
+                    <nav class="flex gap-x-6 -mb-px" aria-label="Tabs">
+                        <button @click="assetTab = 'characters'" :class="{'active': assetTab === 'characters'}" class="asset-tab-button text-slate-400 hover:text-white px-1 pb-2 font-medium text-sm" x-text="uiStrings.character[currentLang]"></button>
+                        <button @click="assetTab = 'locations'" :class="{'active': assetTab === 'locations'}" class="asset-tab-button text-slate-400 hover:text-white px-1 pb-2 font-medium text-sm" x-text="uiStrings.location[currentLang]"></button>
+                        <button @click="assetTab = 'properties'" :class="{'active': assetTab === 'properties'}" class="asset-tab-button text-slate-400 hover:text-white px-1 pb-2 font-medium text-sm" x-text="uiStrings.property[currentLang]"></button>
+                    </nav>
+                </div>
+
+                <!-- Character Content -->
+                <div x-show="assetTab === 'characters'" x-cloak>
+                    <h3 class="text-xl font-semibold mb-4 text-white" x-text="editingCharacterId ? uiStrings.editCharacter[currentLang] : uiStrings.characterProfile[currentLang]"></h3>
+                    <div class="bg-slate-900/50 p-5 rounded-xl space-y-6 border border-slate-700/50">
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.charType[currentLang]"></label><select x-model="newChar.type" class="form-input w-full rounded-lg px-4 py-2"><option value="humanoid" x-text="uiStrings.humanoid[currentLang]"></option><option value="creature" x-text="uiStrings.creature[currentLang]"></option></select></div>
+                        <h4 class="text-lg font-semibold text-blue-300 border-b border-blue-300/30 pb-2" x-text="uiStrings.coreProfile[currentLang]"></h4>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.charId[currentLang]"></label><input type="text" x-model="newChar.id" :placeholder="uiStrings.charIdPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2" :disabled="editingCharacterId"></div>
+                        <div x-show="newChar.type === 'humanoid'" class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.age[currentLang]"></label><input type="text" x-model="newChar.human.age" :placeholder="uiStrings.agePlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.gender[currentLang]"></label><input type="text" x-model="newChar.human.gender" :placeholder="uiStrings.genderPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.bodyShape[currentLang]"></label><input type="text" x-model="newChar.human.bodyShape" :placeholder="uiStrings.bodyShapePlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.facialDetails[currentLang]"></label><textarea x-model="newChar.human.facialDetails" rows="2" :placeholder="uiStrings.facialDetailsPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.uniqueMarks[currentLang]"></label><textarea x-model="newChar.human.uniqueMarks" rows="2" :placeholder="uiStrings.uniqueMarksPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div></div>
+                        <div x-show="newChar.type === 'creature'" class="space-y-6"><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.coreConcept[currentLang]"></label><input type="text" x-model="newChar.creature.coreConcept" :placeholder="uiStrings.coreConceptPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.physicalDesc[currentLang]"></label><textarea x-model="newChar.creature.physicalDesc" rows="4" :placeholder="uiStrings.physicalDescPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div><div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.distinctiveDetails[currentLang]"></label><textarea x-model="newChar.creature.uniqueDetails" rows="3" :placeholder="uiStrings.distinctiveDetailsPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div></div>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2 mt-2" x-text="uiStrings.voiceProfile[currentLang]"></label><input type="text" x-model="newChar.voiceProfile" :placeholder="uiStrings.voiceProfilePlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div>
+                        <h4 class="text-lg font-semibold text-green-300 border-b border-green-300/30 pt-4 pb-2" x-text="uiStrings.defaultWardrobe[currentLang]"></h4>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.typicalOutfit[currentLang]"></label><textarea x-model="newChar.defaultClothing" rows="2" :placeholder="uiStrings.typicalOutfitPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div>
+                        <div class="flex space-x-4 pt-4"><button @click="saveCharacter" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="editingCharacterId ? uiStrings.updateCharacter[currentLang] : uiStrings.saveCharacter[currentLang]"></button><button x-show="editingCharacterId" @click="cancelEditCharacter" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="uiStrings.cancel[currentLang]"></button></div>
+                    </div>
+                    <h3 class="text-lg font-semibold mt-8 mb-4 text-white" x-text="uiStrings.savedCharacters[currentLang]"></h3>
+                    <div class="space-y-3"><template x-for="char in characters" :key="char.id"><div class="bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700"><span class="font-medium text-white" x-text="char.id"></span><div class="flex items-center space-x-4"><button @click="editCharacter(char.id)" class="text-amber-400 hover:text-amber-300 text-xs font-semibold">Ubah</button><button @click="deleteCharacter(char.id)" class="text-red-400 hover:text-red-300 text-xs font-semibold">Hapus</button></div></div></template></div>
+                </div>
+
+                <div x-show="assetTab === 'locations'" x-cloak>
+                    <h3 class="text-xl font-semibold mb-4 text-white" x-text="editingLocationId ? uiStrings.editLocation[currentLang] : uiStrings.locationProfile[currentLang]"></h3>
+                    <div class="bg-slate-900/50 p-5 rounded-xl space-y-6 border border-slate-700/50">
+                        <h4 class="text-lg font-semibold text-amber-300 border-b border-amber-300/30 pb-2" x-text="uiStrings.locationData[currentLang]"></h4>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.locationId[currentLang]"></label><input type="text" x-model="newLocation.id" :placeholder="uiStrings.locationIdPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2" :disabled="editingLocationId"></div>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.generalDesc[currentLang]"></label><input type="text" x-model="newLocation.desc" :placeholder="uiStrings.generalDescPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.keyElements[currentLang]"></label><textarea x-model="newLocation.elements" rows="4" :placeholder="uiStrings.keyElementsPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div>
+                        <div class="flex space-x-4 pt-4"><button @click="saveLocation" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="editingLocationId ? uiStrings.updateLocation[currentLang] : uiStrings.saveLocation[currentLang]"></button><button x-show="editingLocationId" @click="cancelEditLocation" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="uiStrings.cancel[currentLang]"></button></div>
+                    </div>
+                    <h3 class="text-lg font-semibold mt-8 mb-4 text-white" x-text="uiStrings.savedLocations[currentLang]"></h3>
+                    <div class="space-y-3"><template x-for="loc in locations" :key="loc.id"><div class="bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700"><span class="font-medium text-white" x-text="loc.id"></span><div class="flex items-center space-x-4"><button @click="editLocation(loc.id)" class="text-amber-400 hover:text-amber-300 text-xs font-semibold">Ubah</button><button @click="deleteLocation(loc.id)" class="text-red-400 hover:text-red-300 text-xs font-semibold">Hapus</button></div></div></template></div>
+                </div>
+
+                <div x-show="assetTab === 'properties'" x-cloak>
+                    <h3 class="text-xl font-semibold mb-4 text-white" x-text="editingPropertyId ? uiStrings.editProperty[currentLang] : uiStrings.propertyProfile[currentLang]"></h3>
+                    <div class="bg-slate-900/50 p-5 rounded-xl space-y-6 border border-slate-700/50">
+                         <h4 class="text-lg font-semibold text-violet-300 border-b border-violet-300/30 pb-2" x-text="uiStrings.propertyData[currentLang]"></h4>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.propertyId[currentLang]"></label><input type="text" x-model="newProperty.id" :placeholder="uiStrings.propertyIdPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2" :disabled="editingPropertyId"></div>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.propertyType[currentLang]"></label><input type="text" x-model="newProperty.type" :placeholder="uiStrings.propertyTypePlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></div>
+                        <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.propertyDesc[currentLang]"></label><textarea x-model="newProperty.description" rows="4" :placeholder="uiStrings.propertyDescPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div>
+                         <div class="flex space-x-4 pt-4"><button @click="saveProperty" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="editingPropertyId ? uiStrings.updateProperty[currentLang] : uiStrings.saveProperty[currentLang]"></button><button x-show="editingPropertyId" @click="cancelEditProperty" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2.5 px-4 rounded-lg" x-text="uiStrings.cancel[currentLang]"></button></div>
+                    </div>
+                    <h3 class="text-lg font-semibold mt-8 mb-4 text-white" x-text="uiStrings.savedProperties[currentLang]"></h3>
+                    <div class="space-y-3"><template x-for="prop in properties" :key="prop.id"><div class="bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700"><span class="font-medium text-white" x-text="prop.id"></span><div class="flex items-center space-x-4"><button @click="editProperty(prop.id)" class="text-amber-400 hover:text-amber-300 text-xs font-semibold">Ubah</button><button @click="deleteProperty(prop.id)" class="text-red-400 hover:text-red-300 text-xs font-semibold">Hapus</button></div></div></template></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 p-6 rounded-2xl shadow-lg border border-slate-700/50 flex flex-col">
+                <h2 class="text-2xl font-semibold mb-6 text-white" x-text="uiStrings.sceneComposer[currentLang]"></h2>
+                <div id="storyboard-list" class="space-y-6 overflow-y-auto flex-grow pr-3 -mr-3">
+                   <template x-for="(scene, index) in storyboard" :key="index">
+                       <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-700/50 relative">
+                           <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg text-white" x-text="uiStrings.scene[currentLang] + ' ' + (index + 1)"></h3><button @click="removeScene(index)" class="text-slate-500 hover:text-red-400 text-2xl font-bold">&times;</button></div>
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.character[currentLang]"></label><select x-model="scene.characterId" @change="updateSceneOutfit(index)" class="form-input w-full rounded-lg px-4 py-2"><option value="" x-text="uiStrings.noCharacter[currentLang]"></option><template x-for="char in characters"><option :value="char.id" x-text="char.id"></option></template></select></div>
+                               <div><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.location[currentLang]"></label><select x-model="scene.locationId" class="form-input w-full rounded-lg px-4 py-2"><option value="" x-text="uiStrings.noLocation[currentLang]"></option><template x-for="loc in locations"><option :value="loc.id" x-text="loc.id"></option></template></select></div>
+                           </div>
+                           <div class="mt-4 pt-4 border-t border-slate-700/80"><h4 class="text-sm font-semibold text-red-300 mb-2" x-text="uiStrings.sceneConditions[currentLang]"></h4><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"><div><label class="block text-xs font-medium text-slate-400 mb-1" x-text="uiStrings.time[currentLang]"></label><select x-model="scene.time" class="form-input w-full rounded-md px-3 py-2 text-sm"><template x-for="time in availableTimes"><option :value="time" x-text="time"></option></template></select></div><div><label class="block text-xs font-medium text-slate-400 mb-1" x-text="uiStrings.weather[currentLang]"></label><select x-model="scene.weather" class="form-input w-full rounded-md px-3 py-2 text-sm"><template x-for="weather in availableWeathers"><option :value="weather" x-text="weather"></option></template></select></div></div><div><label class="block text-xs font-medium text-slate-400 mb-1" x-text="uiStrings.atmosphere[currentLang]"></label><input type="text" x-model="scene.atmosphere" :placeholder="uiStrings.atmospherePlaceholder[currentLang]" class="form-input w-full rounded-md px-3 py-2 text-sm"></div></div>
+                           <div class="mt-4 pt-4 border-t border-slate-700/80"><label class="block text-sm font-medium text-slate-400 mb-2" x-text="uiStrings.action[currentLang]"></label><textarea x-model="scene.action" rows="3" :placeholder="uiStrings.actionPlaceholder[currentLang]" class="form-input w-full rounded-lg px-4 py-2"></textarea></div>
+                           <template x-if="scene.characterId"><div class="mt-4 pt-4 border-t border-slate-700/80 space-y-3"><h4 class="text-sm font-semibold text-green-300" x-text="uiStrings.sceneWardrobe[currentLang]"></h4><div><label class="block text-xs font-medium text-slate-400 mb-1" x-text="uiStrings.outfit[currentLang]"></label><textarea x-model="scene.outfit.clothing" rows="2" class="form-input w-full rounded-md px-3 py-2 text-sm"></textarea></div></div></template>
+                           <div class="mt-4 pt-4 border-t border-slate-700/80"><h4 class="text-sm font-semibold text-violet-300 mb-2" x-text="uiStrings.propInteraction[currentLang]"></h4><div class="space-y-2"><template x-for="(interaction, i_index) in scene.interactions" :key="i_index"><div class="flex items-center space-x-2"><select x-model="interaction.characterId" class="form-input w-1/3 rounded-md p-1 text-xs"><option value="">-- Karakter --</option><template x-for="c in characters"><option :value="c.id" x-text="c.id"></option></template></select><select x-model="interaction.action" class="form-input w-1/3 rounded-md p-1 text-xs"><option value="is driving">mengendarai</option><option value="is holding">memegang</option><option value="is using">menggunakan</option></select><select x-model="interaction.propertyId" class="form-input w-1/3 rounded-md p-1 text-xs"><option value="">-- Properti --</option><template x-for="p in properties"><option :value="p.id" x-text="p.id"></option></template></select><button @click="removeInteraction(index, i_index)" class="text-red-400 p-1 text-xl font-bold">&times;</button></div></template></div><button @click="addInteraction(index)" class="mt-2 text-xs border border-dashed border-slate-600 rounded-md px-3 py-1 hover:bg-slate-700/50" x-text="uiStrings.addInteraction[currentLang]"></button></div>
+                       </div>
+                   </template>
+                   <button @click="addScene" class="w-full mt-2 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-slate-400 font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                        <span x-text="uiStrings.addScene[currentLang]"></span>
+                   </button>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-700"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-semibold text-white" x-text="uiStrings.promptOutput[currentLang]"></h2><button @click="generateStoryboardPrompts" class="bg-gradient-to-r from-sky-500 to-indigo-600 hover:shadow-lg hover:shadow-indigo-600/30 text-white font-bold py-2.5 px-6 rounded-lg">Generate!</button></div>
+                   <div id="output-container" class="space-y-4 overflow-y-auto max-h-96 pr-2"><template x-if="generatedPrompts.length === 0"><p class="text-slate-500 text-center py-8" x-text="uiStrings.outputPlaceholder[currentLang]"></p></template><template x-for="(prompt, index) in generatedPrompts" :key="index"><div class="bg-slate-900/70 p-4 rounded-lg border border-slate-700/50"><div class="flex justify-between items-start mb-2"><h4 class="font-bold text-lg text-sky-400" x-text="prompt.title"></h4><button @click="copyToClipboard(prompt.fullPrompt, $event.target)" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-1 px-3 rounded-md">Salin</button></div><p class="text-slate-300 text-sm leading-relaxed" x-html="prompt.htmlPrompt"></p></div></template></div>
+               </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('promptApp', () => ({
+                currentLang: 'id',
+                assetTab: 'characters',
+                newChar: {},
+                characters: [],
+                editingCharacterId: null,
+                newLocation: {},
+                locations: [],
+                editingLocationId: null,
+                newProperty: {},
+                properties: [],
+                editingPropertyId: null,
+                storyboard: [],
+                generatedPrompts: [],
+                availableTimes: ['Pagi Hari', 'Siang Hari', 'Sore (Golden Hour)', 'Senja (Twilight)', 'Malam Hari', 'Dini Hari'],
+                availableWeathers: ['Cerah', 'Berawan', 'Mendung', 'Hujan Ringan', 'Badai Petir', 'Berkabut', 'Berangin', 'Bersalju'],
+                uiStrings: {"edit":{"id":"Ubah","en":"Edit"},"cancel":{"id":"Batal","en":"Cancel"},"editCharacter":{"id":"Ubah Profil Karakter","en":"Edit Character Profile"},"editLocation":{"id":"Ubah Profil Lokasi","en":"Edit Location Profile"},"editProperty":{"id":"Ubah Profil Properti","en":"Edit Property Profile"},"updateCharacter":{"id":"Perbarui Karakter","en":"Update Character"},"updateLocation":{"id":"Perbarui Lokasi","en":"Update Location"},"updateProperty":{"id":"Perbarui Properti","en":"Update Property"},"assetLibrary":{"id":"Perpustakaan Aset","en":"Asset Library"},"character":{"id":"Karakter","en":"Character"},"location":{"id":"Lokasi","en":"Location"},"property":{"id":"Properti","en":"Property"},"delete":{"id":"Hapus","en":"Delete"},"noOption":{"id":"-- Tidak ada --","en":"-- None --"},"copy":{"id":"Salin","en":"Copy"},"copySuccess":{"id":"Disalin!","en":"Copied!"},"characterProfile":{"id":"Profil Karakter Baru","en":"New Character Profile"},"charType":{"id":"Pilih Tipe Karakter","en":"Select Character Type"},"humanoid":{"id":"Manusia / Humanoid","en":"Humanoid"},"creature":{"id":"Makhluk / Non-Manusia","en":"Creature / Non-Human"},"coreProfile":{"id":"Profil Inti","en":"Core Profile"},"charId":{"id":"ID Karakter Unik (Tidak bisa diubah)","en":"Unique Character ID (Cannot be changed)"},"charIdPlaceholder":{"id":"Contoh: DetektifRina_01","en":"e.g., DetectiveRina_01"},"age":{"id":"Usia","en":"Age"},"agePlaceholder":{"id":"Contoh: 35 tahun","en":"e.g., 35 years old"},"gender":{"id":"Gender","en":"Gender"},"genderPlaceholder":{"id":"Contoh: Wanita","en":"e.g., Female"},"bodyShape":{"id":"Bentuk Tubuh & Postur","en":"Body Shape & Posture"},"bodyShapePlaceholder":{"id":"Contoh: Atletis, tegap","en":"e.g., Athletic, upright"},"facialDetails":{"id":"Detail Wajah & Rambut","en":"Face & Hair Details"},"facialDetailsPlaceholder":{"id":"Contoh: Wajah tirus, rambut hitam sebahu","en":"e.g., Sharp face, shoulder-length black hair"},"uniqueMarks":{"id":"Ciri Khas & Tanda Unik","en":"Unique Marks & Scars"},"uniqueMarksPlaceholder":{"id":"Contoh: Mata kiri sibernetik, bekas luka","en":"e.g., Cybernetic left eye, scar"},"coreConcept":{"id":"Konsep Inti / Spesies","en":"Core Concept / Species"},"coreConceptPlaceholder":{"id":"Contoh: Naga Api Kuno","en":"e.g., Ancient Fire Dragon"},"physicalDesc":{"id":"Deskripsi Fisik Utama","en":"Main Physical Description"},"physicalDescPlaceholder":{"id":"Contoh: Tubuh reptil raksasa, bersisik merah...","en":"e.g., Giant reptilian body, red scales..."},"distinctiveDetails":{"id":"Detail Khas & Mencolok","en":"Distinctive Details"},"distinctiveDetailsPlaceholder":{"id":"Contoh: Mata menyala seperti magma...","en":"e.g., Eyes glow like magma..."},"voiceProfile":{"id":"Profil Suara","en":"Voice Profile"},"voiceProfilePlaceholder":{"id":"Contoh: Suara bariton","en":"e.g., Baritone voice"},"defaultWardrobe":{"id":"Wardrobe / Perlengkapan Default","en":"Default Wardrobe / Equipment"},"typicalOutfit":{"id":"Pakaian/Perlengkapan Khas","en":"Typical Outfit/Equipment"},"typicalOutfitPlaceholder":{"id":"Contoh: Trench coat abu-abu","en":"e.g., Grey trench coat"},"saveCharacter":{"id":"Simpan Karakter Baru","en":"Save New Character"},"savedCharacters":{"id":"Karakter Tersimpan","en":"Saved Characters"},"noCharacters":{"id":"Belum ada karakter.","en":"No characters yet."},"locationProfile":{"id":"Profil Lokasi Baru","en":"New Location Profile"},"locationData":{"id":"Data Fisik Lokasi","en":"Physical Location Data"},"locationId":{"id":"ID Lokasi Unik (Tidak bisa diubah)","en":"Unique Location ID (Cannot be changed)"},"locationIdPlaceholder":{"id":"Contoh: KafeCyber_Distrik7","en":"e.g., CyberCafe_District7"},"generalDesc":{"id":"Deskripsi Umum","en":"General Description"},"generalDescPlaceholder":{"id":"Contoh: Kafe remang-remang di gang sempit","en":"e.g., A dim-lit cafe in a narrow alley"},"keyElements":{"id":"Elemen Kunci & Arsitektur","en":"Key Elements & Architecture"},"keyElementsPlaceholder":{"id":"Contoh: Bar holografik, poster anime...","en":"e.g., Holographic bar, anime posters..."},"saveLocation":{"id":"Simpan Lokasi Baru","en":"Save New Location"},"savedLocations":{"id":"Lokasi Tersimpan","en":"Saved Locations"},"noLocations":{"id":"Belum ada lokasi.","en":"No locations yet."},"propertyProfile":{"id":"Profil Properti Baru","en":"New Property Profile"},"propertyData":{"id":"Data Fisik Properti","en":"Physical Property Data"},"propertyId":{"id":"ID Properti Unik (Tidak bisa diubah)","en":"Unique Property ID (Cannot be changed)"},"propertyIdPlaceholder":{"id":"Contoh: MustangMerah_Klasik","en":"e.g., RedMustang_Classic"},"propertyType":{"id":"Tipe Properti","en":"Property Type"},"propertyTypePlaceholder":{"id":"Contoh: Kendaraan, Senjata","en":"e.g., Vehicle, Weapon"},"propertyDesc":{"id":"Deskripsi Fisik Detail","en":"Detailed Physical Description"},"propertyDescPlaceholder":{"id":"Contoh: Mobil sport Mustang 1969...","en":"e.g., A 1969 Mustang sports car..."},"saveProperty":{"id":"Simpan Properti Baru","en":"Save New Property"},"savedProperties":{"id":"Properti Tersimpan","en":"Saved Properties"},"noProperties":{"id":"Belum ada properti.","en":"No properties yet."},"sceneComposer":{"id":"Penyusun Adegan","en":"Scene Composer"},"scene":{"id":"Adegan","en":"Scene"},"deleteScene":{"id":"HAPUS","en":"DELETE"},"noCharacter":{"id":"-- Tanpa Karakter --","en":"-- No Character --"},"noLocation":{"id":"-- Tanpa Lokasi --","en":"-- No Location --"},"sceneConditions":{"id":"Kondisi Adegan","en":"Scene Conditions"},"time":{"id":"Waktu","en":"Time"},"weather":{"id":"Cuaca","en":"Weather"},"atmosphere":{"id":"Atmosfer/Pencahayaan","en":"Atmosphere/Lighting"},"atmospherePlaceholder":{"id":"misal: diterangi lampu neon","en":"e.g., lit by neon lights"},"action":{"id":"Aksi","en":"Action"},"actionPlaceholder":{"id":"Contoh: Naga mendarat...","en":"e.g., The dragon lands..."},"sceneWardrobe":{"id":"Wardrobe Adegan Ini","en":"This Scene's Wardrobe"},"outfit":{"id":"Pakaian/Perlengkapan","en":"Outfit/Equipment"},"propInteraction":{"id":"Interaksi Properti","en":"Property Interaction"},"addInteraction":{"id":"+ Tambah Interaksi","en":"+ Add Interaction"},"driving":{"id":"mengendarai","en":"is driving"},"holding":{"id":"memegang","en":"is holding"},"using":{"id":"menggunakan","en":"is using"},"addScene":{"id":"Tambah Adegan","en":"Add Scene"},"promptOutput":{"id":"Hasil Prompt","en":"Prompt Output"},"generate":{"id":"Generate!","en":"Generate!"},"outputPlaceholder":{"id":"Hasil prompt akan muncul di sini.","en":"Prompt output will appear here."}},
+                
+                init() {
+                    this.loadData();
+                    this.resetAllForms();
+                    if (this.storyboard.length === 0) { this.addScene(); }
+                    this.$watch('characters', () => this.saveData());
+                    this.$watch('locations', () => this.saveData());
+                    this.$watch('properties', () => this.saveData());
+                    this.$watch('storyboard', () => this.saveData());
+                },
+                saveData() {
+                    const appData = { characters: this.characters, locations: this.locations, properties: this.properties, storyboard: this.storyboard, currentLang: this.currentLang };
+                    localStorage.setItem('maddasoft_prompt_data', JSON.stringify(appData));
+                },
+                loadData() {
+                    const savedData = localStorage.getItem('maddasoft_prompt_data');
+                    if (savedData) {
+                        const appData = JSON.parse(savedData);
+                        this.characters = appData.characters || [];
+                        this.locations = appData.locations || [];
+                        this.properties = appData.properties || [];
+                        this.storyboard = appData.storyboard || [];
+                        this.currentLang = appData.currentLang || 'id';
+                    }
+                },
+                resetAllForms() { this.resetCharacterForm(); this.resetLocationForm(); this.resetPropertyForm(); },
+                resetCharacterForm() { this.newChar = { id: '', type: 'humanoid', human: {}, creature: {}, voiceProfile: '', defaultClothing: '' }; this.editingCharacterId = null; },
+                editCharacter(charId) { const target = this.characters.find(c => c.id === charId); if(target){ this.newChar = JSON.parse(JSON.stringify(target)); this.editingCharacterId = charId; }},
+                cancelEditCharacter() { this.resetCharacterForm(); },
+                saveCharacter() {
+                    if (this.editingCharacterId) {
+                        const index = this.characters.findIndex(c => c.id === this.editingCharacterId);
+                        if (index !== -1) this.characters[index] = JSON.parse(JSON.stringify(this.newChar));
+                    } else {
+                        if (!this.newChar.id || this.characters.some(c => c.id === this.newChar.id)) { alert('ID tidak boleh kosong atau sudah ada.'); return; }
+                        this.characters.push(JSON.parse(JSON.stringify(this.newChar)));
+                    }
+                    this.resetCharacterForm();
+                },
+                deleteCharacter(charId) { if (confirm('Yakin hapus?')) { this.characters = this.characters.filter(c => c.id !== charId); if (this.editingCharacterId === charId) this.resetCharacterForm(); }},
+                resetLocationForm() { this.newLocation = { id: '', desc: '', elements: '' }; this.editingLocationId = null; },
+                editLocation(locId) { const target = this.locations.find(l => l.id === locId); if(target){ this.newLocation = JSON.parse(JSON.stringify(target)); this.editingLocationId = locId; }},
+                cancelEditLocation() { this.resetLocationForm(); },
+                saveLocation() {
+                    if (this.editingLocationId) { const index = this.locations.findIndex(l => l.id === this.editingLocationId); if (index !== -1) this.locations[index] = JSON.parse(JSON.stringify(this.newLocation));
+                    } else {
+                        if (!this.newLocation.id || this.locations.some(l => l.id === this.newLocation.id)) { alert('ID tidak boleh kosong atau sudah ada.'); return; }
+                        this.locations.push(JSON.parse(JSON.stringify(this.newLocation)));
+                    }
+                    this.resetLocationForm();
+                },
+                deleteLocation(locId) { if (confirm('Yakin hapus?')) { this.locations = this.locations.filter(l => l.id !== locId); if (this.editingLocationId === locId) this.resetLocationForm(); }},
+                resetPropertyForm() { this.newProperty = { id: '', type: '', description: '' }; this.editingPropertyId = null; },
+                editProperty(propId) { const target = this.properties.find(p => p.id === propId); if(target){ this.newProperty = JSON.parse(JSON.stringify(target)); this.editingPropertyId = propId; }},
+                cancelEditProperty() { this.resetPropertyForm(); },
+                saveProperty() {
+                    if (this.editingPropertyId) { const index = this.properties.findIndex(p => p.id === this.editingPropertyId); if (index !== -1) this.properties[index] = JSON.parse(JSON.stringify(this.newProperty));
+                    } else {
+                        if (!this.newProperty.id || this.properties.some(p => p.id === this.newProperty.id)) { alert('ID tidak boleh kosong atau sudah ada.'); return; }
+                        this.properties.push(JSON.parse(JSON.stringify(this.newProperty)));
+                    }
+                    this.resetPropertyForm();
+                },
+                deleteProperty(propId) { if (confirm('Yakin hapus?')) { this.properties = this.properties.filter(p => p.id !== propId); if (this.editingPropertyId === propId) this.resetPropertyForm(); }},
+                addScene() { this.storyboard.push({ characterId: '', locationId: '', action: '', outfit: { clothing: '' }, time: 'Siang Hari', weather: 'Cerah', atmosphere: '', interactions: [] }); },
+                removeScene(index) { this.storyboard.splice(index, 1); },
+                updateSceneOutfit(sceneIndex) { const scene = this.storyboard[sceneIndex]; if (!scene.characterId) { scene.outfit.clothing = ''; return; } const character = this.characters.find(c => c.id === scene.characterId); if (character) { scene.outfit.clothing = character.defaultClothing; }},
+                addInteraction(sceneIndex) { this.storyboard[sceneIndex].interactions.push({ characterId: '', action: 'is using', propertyId: '' }); },
+                removeInteraction(sceneIndex, i_index) { this.storyboard[sceneIndex].interactions.splice(i_index, 1); },
+                generateStoryboardPrompts() {
+                    this.generatedPrompts = [];
+                    const style = "photorealistic, 8K, highly detailed, film grain, cinematic lighting";
+                    this.storyboard.forEach((scene, index) => {
+                        if (!scene.action.trim() && scene.interactions.length === 0) return;
+                        let promptParts = []; let htmlParts = [];
+                        if(scene.characterId) {
+                            const character = this.characters.find(c => c.id === scene.characterId);
+                            if (character) {
+                                const coreDesc = this.buildCoreDescription(character);
+                                const coreBlock = `((Character ${character.id}: ${coreDesc}. Voice Profile: ${character.voiceProfile}))`;
+                                const wardrobeBlock = scene.outfit.clothing ? `equipped with ${scene.outfit.clothing}` : '';
+                                promptParts.push(`${coreBlock} ${wardrobeBlock}`);
+                                htmlParts.push(`<span class="prompt-highlight-char">${coreBlock}</span> ${wardrobeBlock}`);
+                            }
+                        }
+                        let interactionDescs = []; let interactionHtmls = [];
+                        scene.interactions.forEach(inter => {
+                            if (inter.characterId && inter.propertyId) {
+                                const char = this.characters.find(c => c.id === inter.characterId);
+                                const prop = this.properties.find(p => p.id === inter.propertyId);
+                                if (char && prop) {
+                                    const desc = `Character ${char.id} ${inter.action} a ((Property ${prop.id}: a ${prop.type}, ${prop.description}))`;
+                                    interactionDescs.push(desc);
+                                    interactionHtmls.push(`Character ${char.id} ${inter.action} a <span class="prompt-highlight-prop">((Property ${prop.id}: a ${prop.type}, ${prop.description}))</span>`);
+                                }
+                            }
+                        });
+                        if(interactionDescs.length > 0) { promptParts.push(interactionDescs.join('. ')); htmlParts.push(interactionHtmls.join('. '));}
+                        if(scene.action.trim()) { promptParts.push(scene.action); htmlParts.push(scene.action); }
+                        if (scene.locationId) {
+                             const loc = this.locations.find(l => l.id === scene.locationId);
+                             if(loc) {
+                                const locBlock = `in the location ((Location Profile ${loc.id}: ${loc.desc}. Key physical elements: ${loc.elements}))`;
+                                promptParts.push(locBlock);
+                                htmlParts.push(`in the location <span class="prompt-highlight-location">${locBlock.replace('in the location ','')}</span>`);
+                             }
+                        }
+                        const timeOfDayMap = { 'Pagi Hari': 'morning', 'Siang Hari': 'daytime', 'Sore (Golden Hour)': 'golden hour', 'Senja (Twilight)': 'twilight', 'Malam Hari': 'night time', 'Dini Hari': 'early morning' };
+                        const weatherMap = { 'Cerah': 'clear sky', 'Berawan': 'cloudy', 'Mendung': 'overcast', 'Hujan Ringan': 'light rain', 'Badai Petir': 'thunderstorm', 'Berkabut': 'foggy', 'Berangin': 'windy', 'Bersalju': 'snowy' };
+                        const timeEN = timeOfDayMap[scene.time] || scene.time;
+                        const weatherEN = weatherMap[scene.weather] || scene.weather;
+                        const conditionBlock = `The scene's atmosphere is ((time: ${timeEN}, weather: ${weatherEN}, mood: ${scene.atmosphere || 'normal'}))`;
+                        promptParts.push(conditionBlock);
+                        htmlParts.push(`The atmosphere is <span class="prompt-highlight-condition">${conditionBlock.replace("The scene's atmosphere is ",'')}</span>`);
+                        promptParts.push(style);
+                        htmlParts.push(style);
+                        this.generatedPrompts.push({ title: `Scene Prompt ${index + 1}`, fullPrompt: promptParts.join('. ').replace(/\s+/g, ' ').trim(), htmlPrompt: htmlParts.join('. ') });
+                    });
+                },
+                buildCoreDescription(charProfile) {
+                    if (!charProfile) return '';
+                    let parts = [];
+                    if (charProfile.type === 'humanoid') {
+                        const h = charProfile.human || {};
+                        if (h.age && h.gender) parts.push(`${h.age} ${h.gender}`);
+                        if (h.bodyShape) parts.push(`Body shape: ${h.bodyShape}`);
+                        if (h.facialDetails) parts.push(`Face and hair: ${h.facialDetails}`);
+                        if (h.uniqueMarks) parts.push(`Unique marks: ${h.uniqueMarks}`);
+                    } else {
+                        const c = charProfile.creature || {};
+                        if (c.coreConcept) parts.push(c.coreConcept);
+                        if (c.physicalDesc) parts.push(`Main physical description: ${c.physicalDesc}`);
+                        if (c.uniqueDetails) parts.push(`Distinctive details: ${c.uniqueDetails}`);
+                    }
+                    return parts.filter(Boolean).join('. ');
+                },
+                copyToClipboard(text, buttonElement) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalText = buttonElement.textContent;
+                        buttonElement.textContent = this.uiStrings.copySuccess[this.currentLang];
+                        setTimeout(() => { buttonElement.textContent = originalText; }, 2000);
+                    }, () => { alert('Gagal menyalin teks.'); });
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
